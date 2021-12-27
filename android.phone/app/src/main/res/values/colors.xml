@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary_200">#BC0090</color>
+    <color name="primary_500">#BC2C00</color>
+    <color name="primary_700">#BC0032</color>
+    <color name="secondary_200">#00EFAF</color>
+    <color name="secondary_700">#00BC8A</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="activity_bg_color">#262626</color>
+    <color name="card_bg_color">#FF3B3B3B</color>
+    <color name="card_image_bg_color">#FF5B5B5B</color>
+    <color name="card_title_bg_color">#FF3B3B3B</color>
+    <color name="card_title_text_color">#FFEEEEEE</color>
+</resources>

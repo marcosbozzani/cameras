@@ -1,0 +1,55 @@
+﻿<Project>
+	<Target Name="BuildConfig" BeforeTargets="BeforeBuild">
+		<WriteLinesToFile File="$(IntermediateOutputPath)gen.cs" Overwrite="true" Lines="
+			namespace Duck.Cameras.Windows
+			{
+				static partial class BuildConfig
+				{ 
+					static BuildConfig()
+					{
+						BuildDate = &quot;$([System.DateTime]::UtcNow.ToString(&quot;o&quot;))&quot;%3B
+					}
+				}
+			}
+		" />
+		<ItemGroup>
+			<Compile Include="$(IntermediateOutputPath)gen.cs" />
+		</ItemGroup>
+	</Target>
+	<Target Name="CopyMessages" BeforeTargets="BeforeBuild">
+		<ItemGroup>
+			<Messages Include="$(ProjectDir)\..\messages\*.*" />
+		</ItemGroup>
+		<Copy SourceFiles="@(Messages)" DestinationFolder="$(ProjectDir)\Resources\" SkipUnchangedFiles="true" />
+	</Target>
+	<Target Name="ConvertMessages" AfterTargets="CopyMessages">
+		<ItemGroup>
+			<MessagesInResources Include="$(ProjectDir)\Resources\*.xml" />
+		</ItemGroup>
+		<ConvertStringFormat SourceFiles="@(MessagesInResources)" />
+	</Target>
+	<UsingTask TaskName="ConvertStringFormat" TaskFactory="CodeTaskFactory" 
+			   AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+		<ParameterGroup>
+			<SourceFiles ParameterType="System.String[]" Required="true" />
+		</ParameterGroup>
+		<Task>
+			<Reference Include="System.Core" />
+			<Using Namespace="System" />
+			<Using Namespace="System.IO" />
+			<Using Namespace="System.Text.RegularExpressions" />
+			<Code Type="Fragment" Language="cs">
+				<![CDATA[
+					var pattern = @"%(\d)\$" + "(.)";
+					MatchEvaluator evaluator = m => "{" + (int.Parse(m.Groups[1].Value) - 1) + ":" + m.Groups[2] + "}";
+					foreach (var file in SourceFiles)
+					{
+						var input = File.ReadAllText(file);
+						var output = Regex.Replace(input, pattern, evaluator);
+						File.WriteAllText(file, output);
+					}
+				]]>
+			</Code>
+		</Task>
+	</UsingTask>
+</Project>
