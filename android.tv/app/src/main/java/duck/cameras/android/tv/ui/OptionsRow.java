@@ -1,6 +1,9 @@
 package duck.cameras.android.tv.ui;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.PorterDuff;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +12,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.core.widget.ImageViewCompat;
 import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.HeaderItem;
 import androidx.leanback.widget.ImageCardView;
@@ -18,13 +23,12 @@ import androidx.leanback.widget.Presenter;
 import duck.cameras.android.tv.BuildConfig;
 import duck.cameras.android.tv.R;
 import duck.cameras.android.model.Action;
-import duck.cameras.android.model.Option;
+import duck.cameras.android.tv.model.Option;
 import duck.cameras.android.util.AppUtils;
 
 public class OptionsRow extends ListRow {
     private final Context context;
     private final Action reloadAction;
-
 
     public OptionsRow(Context context, Action reloadAction) {
         super(createHeader(), createAdapter());
@@ -32,9 +36,9 @@ public class OptionsRow extends ListRow {
         this.reloadAction = reloadAction;
 
         ArrayObjectAdapter adapter = (ArrayObjectAdapter) getAdapter();
-        adapter.add(new Option("Reload", R.drawable.reload));
-        adapter.add(new Option("Version", R.drawable.version));
-        adapter.add(new Option("Exit", R.drawable.exit));
+        adapter.add(new Option("Reload", R.drawable.icon_reload));
+        adapter.add(new Option("Settings", R.drawable.icon_settings));
+        adapter.add(new Option("Exit", R.drawable.icon_close));
     }
 
     @NonNull
@@ -52,8 +56,9 @@ public class OptionsRow extends ListRow {
             case "Reload":
                 reloadAction.execute();
                 break;
-            case "Version":
-                Toast.makeText(context, BuildConfig.BUILD_TIME, Toast.LENGTH_LONG).show();
+            case "Settings":
+                Intent intent = new Intent(context, SettingsActivity.class);
+                context.startActivity(intent);
                 break;
             case "Exit":
                 AppUtils.exit(context);
@@ -76,6 +81,8 @@ public class OptionsRow extends ListRow {
             ImageView image = card.getMainImageView();
             image.setPadding(toDip(20), toDip(20), toDip(20), toDip(20));
             image.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            int tintColor = ContextCompat.getColor(context, R.color.lb_action_text_color);
+            ImageViewCompat.setImageTintList(image, ColorStateList.valueOf(tintColor));
 
             TextView title = card.findViewById(R.id.title_text);
             title.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);

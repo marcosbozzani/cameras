@@ -1,8 +1,11 @@
 package duck.cameras.android.tv.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.leanback.app.BrowseSupportFragment;
 import androidx.leanback.widget.ArrayObjectAdapter;
@@ -11,13 +14,15 @@ import androidx.leanback.widget.Presenter;
 import androidx.leanback.widget.Row;
 import androidx.leanback.widget.RowPresenter;
 
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import duck.cameras.android.tv.R;
 import duck.cameras.android.model.Camera;
 import duck.cameras.android.model.LoadListener;
-import duck.cameras.android.model.Option;
+import duck.cameras.android.service.LocalSettingsManager;
+import duck.cameras.android.tv.R;
+import duck.cameras.android.tv.model.Option;
 import duck.cameras.android.util.ThreadUtils;
 
 public class MainActivity extends FragmentActivity {
@@ -36,6 +41,7 @@ public class MainActivity extends FragmentActivity {
     public static class MainFragment extends BrowseSupportFragment {
         private Timer timer;
         private CamerasRow camerasRow;
+        private boolean entranceDone = false;
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -43,49 +49,80 @@ public class MainActivity extends FragmentActivity {
 
             setHeadersState(HEADERS_HIDDEN);
             setHeadersTransitionOnBackEnabled(true);
-            setBrandColor(getResources().getColor(R.color.app_launcher_background));
+            setBrandColor(ContextCompat.getColor(requireContext(), R.color.app_launcher_background));
             setOnItemViewClickedListener(this::itemClicked);
 
             Context context = requireContext();
             camerasRow = new CamerasRow(context, new ListRowLoadListener());
-            OptionsRow optionsRow = new OptionsRow(context, camerasRow::load);
+            OptionsRow optionsRow = new OptionsRow(context, () -> camerasRow.load(true));
 
             ArrayObjectAdapter adapter = new ArrayObjectAdapter(new ListRowPresenter());
             adapter.add(camerasRow);
             adapter.add(optionsRow);
             setAdapter(adapter);
 
-            camerasRow.load();
+            prepareEntranceTransition();
         }
 
         @Override
         public void onResume() {
             super.onResume();
+
+            if (!LocalSettingsManager.isComplete(getContext())) {
+                Intent intent = new Intent(getContext(), SettingsActivity.class);
+                startActivity(intent);
+                return;
+            }
+
+            camerasRow.load(false);
+
             timer = new Timer();
             timer.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
                     ThreadUtils.runOnUiThread(camerasRow::update);
                 }
-            }, 2000, 500);
+            }, 0, 5000);
         }
 
         @Override
         public void onPause() {
             super.onPause();
-            timer.cancel();
+            if (timer != null) {
+                timer.cancel();
+            }
         }
 
         public class ListRowLoadListener implements LoadListener {
             @Override
             public void loading() {
-                prepareEntranceTransition();
+                if (entranceDone) {
+                    showSpinner();
+                }
             }
 
             @Override
             public void loaded() {
-                startEntranceTransition();
+                if (!entranceDone) {
+                    startEntranceTransition();
+                    entranceDone = true;
+                } else{
+                    hideSpinner();
+                }
             }
+        }
+
+        private void showSpinner() {
+            getSpinner().bringToFront();
+            getSpinner().setVisibility(View.VISIBLE);
+        }
+
+        private void hideSpinner() {
+            getSpinner().setVisibility(View.GONE);
+        }
+
+        private View getSpinner() {
+            return Objects.requireNonNull(getActivity()).findViewById(R.id.main_spinner);
         }
 
         public void itemClicked(Presenter.ViewHolder itemViewHolder, Object item, RowPresenter.ViewHolder rowViewHolder, Row row) {
@@ -93,8 +130,7 @@ public class MainActivity extends FragmentActivity {
                 ((CamerasRow) row).itemClicked((Camera) item);
             } else if (row instanceof OptionsRow) {
                 ((OptionsRow) row).itemClicked((Option) item);
-            }
-            else {
+            } else {
                 throw new IllegalArgumentException(String.format("Invalid row %s", row));
             }
         }

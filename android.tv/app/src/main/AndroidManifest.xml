@@ -29,6 +29,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.StreamActivity" />
+        <activity android:name=".ui.SettingsActivity" />
     </application>
 
 </manifest>

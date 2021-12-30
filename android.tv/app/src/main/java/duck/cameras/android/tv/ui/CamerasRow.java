@@ -2,10 +2,12 @@ package duck.cameras.android.tv.ui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.HeaderItem;
 import androidx.leanback.widget.ImageCardView;
@@ -14,6 +16,8 @@ import androidx.leanback.widget.Presenter;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.signature.ObjectKey;
 
 import java.util.List;
@@ -49,9 +53,9 @@ public class CamerasRow extends ListRow {
         return new ArrayObjectAdapter(new CameraPresenter());
     }
 
-    public void load() {
+    public void load(boolean forceUpdate) {
         loadListener.loading();
-        cameraFinder.findAsync(this::processFindResult);
+        cameraFinder.findFromSettingsAsync(context, forceUpdate, this::processFindResult);
     }
 
     public void update() {
@@ -95,14 +99,31 @@ public class CamerasRow extends ListRow {
             final int height = 9 * 35;
             Camera camera = (Camera) item;
             ImageCardView card = (ImageCardView) viewHolder.view;
-            card.setTitleText(camera.endPoint);
+            card.setTitleText(camera.name == null ? camera.endPoint : camera.name);
             card.setMainImageDimensions(width, height);
-            Glide.with(card.getContext())
-                    .load(camera.profiles.get(0).snapshotUri)
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .signature(new ObjectKey(UUID.randomUUID()))
-                    .placeholder(card.getMainImageView().getDrawable())
-                    .into(card.getMainImageView());
+
+            if (card.getTag() == null) {
+                card.setTag("loading");
+                Glide.with(card.getContext()).clear(card.getMainImageView());
+                Glide.with(card.getContext())
+                        .load(camera.profiles.get(0).snapshotUri)
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .signature(new ObjectKey(UUID.randomUUID()))
+                        .into(new CustomTarget<Drawable>() {
+                            @Override
+                            public void onResourceReady(@NonNull Drawable resource,
+                                                        @Nullable Transition<? super Drawable> transition) {
+                                card.setTag(null);
+                                card.getMainImageView().setImageDrawable(resource);
+                            }
+
+                            @Override
+                            public void onLoadCleared(@Nullable Drawable placeholder) {
+                                card.setTag(null);
+                                card.getMainImageView().setImageDrawable(null);
+                            }
+                        });
+            }
         }
 
         @Override

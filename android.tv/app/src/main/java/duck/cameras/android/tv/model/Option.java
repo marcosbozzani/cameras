@@ -1,4 +1,4 @@
-package duck.cameras.android.model;
+package duck.cameras.android.tv.model;
 
 public class Option {
     private String name;
