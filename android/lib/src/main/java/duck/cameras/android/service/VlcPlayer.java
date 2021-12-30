@@ -11,6 +11,7 @@ import org.videolan.libvlc.interfaces.IVLCVout;
 
 public class VlcPlayer {
 
+    private final int defaultVolume = 100;
     private final MediaPlayer player;
     private final EventListener listener;
 
@@ -35,7 +36,8 @@ public class VlcPlayer {
     }
 
     public void play(String url) {
-        Media media = new Media(player.getLibVLC(), Uri.parse(url));
+        Uri uri = Uri.parse(NetworkService.processUrl(url));
+        Media media = new Media(player.getLibVLC(), uri);
         media.setHWDecoderEnabled(true, false);
         player.setMedia(media);
         player.play();
@@ -47,6 +49,18 @@ public class VlcPlayer {
 
     public void stop() {
         player.stop();
+    }
+
+    public boolean isMuted() {
+        return player.getVolume() == 0;
+    }
+
+    public void mute() {
+        player.setVolume(0);
+    }
+
+    public void unmute() {
+        player.setVolume(defaultVolume);
     }
 
     public boolean isPlaying() {

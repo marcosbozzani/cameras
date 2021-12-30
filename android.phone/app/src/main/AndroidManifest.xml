@@ -20,7 +20,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.StreamActivity" />
+        <activity android:name=".ui.StreamActivity" android:parentActivityName=".ui.MainActivity" />
+        <activity android:name=".ui.SettingsActivity" android:parentActivityName=".ui.MainActivity" />
     </application>
 
 </manifest>

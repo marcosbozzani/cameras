@@ -8,6 +8,7 @@ public class Camera implements Serializable {
     public ArrayList<Service> services;
     public Information information;
     public ArrayList<Profile> profiles;
+    public String name;
 
     public static class Service implements Serializable {
         public String namespace;

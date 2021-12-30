@@ -17,7 +17,7 @@ import duck.cameras.android.model.XmlNode;
 
 public class CameraController {
 
-    private Timer moveTimer;
+    private boolean isMoving = false;
     private final ResourceLoader resourceLoader;
 
     public CameraController(ResourceLoader resourceLoader) {
@@ -118,7 +118,7 @@ public class CameraController {
     }
 
     public void getPtzStatusAsync(PtzData ptzData, Callback<PtzStatus> callback) {
-        run(ptzData, result -> {
+        run(ptzData.camera.endPoint, result -> {
             if (result.ok()) {
                 XmlNode statusNode = result.value().get("GetStatusResponse").get("PTZStatus");
 
@@ -141,44 +141,60 @@ public class CameraController {
     }
 
     public void moveLeft(PtzData ptzData) {
-        move(ptzData, -1, 0);
+        move(ptzData.camera.endPoint, ptzData.profile.token, 1, -1, 0);
     }
 
     public void moveRight(PtzData ptzData) {
-        move(ptzData, +1, 0);
+        move(ptzData.camera.endPoint, ptzData.profile.token, 1, +1, 0);
     }
 
     public void moveUp(PtzData ptzData) {
-        move(ptzData, 0, +1);
+        move(ptzData.camera.endPoint, ptzData.profile.token, 1, 0, +1);
     }
 
     public void moveDown(PtzData ptzData) {
-        move(ptzData, 0, -1);
+        move(ptzData.camera.endPoint, ptzData.profile.token, 1, 0, -1);
     }
 
-    private synchronized void move(PtzData ptzData, double x, double y) {
-        if (moveTimer == null) {
-            final double delta = 0.2;
-            run(ptzData, Callback.empty(), R.raw.ws_continuous_move, ptzData.profile.token, x * delta, y * delta);
-            moveTimer = new Timer();
-            moveTimer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    stop(ptzData);
-                    moveTimer = null;
-                }
-            }, 500);
+    public void moveLeft(String endPoint, String profileToken, double speed) {
+        move(endPoint, profileToken, speed, -1, 0);
+    }
+
+    public void moveRight(String endPoint, String profileToken, double speed) {
+        move(endPoint, profileToken, speed, +1, 0);
+    }
+
+    public void moveUp(String endPoint, String profileToken, double speed) {
+        move(endPoint, profileToken, speed, 0, +1);
+    }
+
+    public void moveDown(String endPoint, String profileToken, double speed) {
+        move(endPoint, profileToken, speed, 0, -1);
+    }
+
+    private synchronized void move(String endPoint, String profileToken, double speed, double x, double y) {
+        if (!isMoving) {
+            isMoving = true;
+            run(endPoint, Callback.empty(), R.raw.ws_continuous_move, profileToken, x * speed, y * speed);
         }
     }
 
     public void stop(PtzData ptzData) {
-        run(ptzData, Callback.empty(), R.raw.ws_stop, ptzData.profile.token);
+        run(ptzData.camera.endPoint, result -> isMoving = false, R.raw.ws_stop, ptzData.profile.token);
     }
 
-    private void run(PtzData ptzData, Callback<XmlNode> callback, @RawRes int resId, Object... params) {
+    public void stop(String endPoint, String profileToken) {
+        run(endPoint, result -> isMoving = false, R.raw.ws_stop, profileToken);
+    }
+
+    public void gotoPreset(String endPoint, String profileToken, String presetToken) {
+        run(endPoint, result -> {}, R.raw.ws_goto_preset, profileToken, presetToken);
+    }
+
+    private void run(String  endPoint, Callback<XmlNode> callback, @RawRes int resId, Object... params) {
         new Thread(() -> {
             try {
-                String url = "http://" + ptzData.camera.endPoint + "/onvif/PTZ";
+                String url = "http://" + endPoint + "/onvif/ptz_service";
                 String response = NetworkService.httpPost(url, resourceLoader.loadString(resId, params));
                 XmlNode envelopeBody = XmlParser.parse(response).get("Body");
                 callback.execute(Result.ok(envelopeBody));

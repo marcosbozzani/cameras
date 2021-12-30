@@ -4,13 +4,15 @@
 
     <item
         android:id="@+id/btn_reload"
-        android:icon="@drawable/reload"
+        android:icon="@drawable/icon_reload"
         android:title=""
+        app:iconTint="@color/white"
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/btn_version"
-        android:icon="@drawable/version"
+        android:id="@+id/btn_settings"
+        android:icon="@drawable/icon_settings"
         android:title=""
+        app:iconTint="@color/white"
         app:showAsAction="always" />
 </menu>

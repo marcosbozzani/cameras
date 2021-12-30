@@ -1,5 +1,6 @@
 package duck.cameras.android.service;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.util.Log;
 
@@ -15,7 +16,9 @@ import java.util.UUID;
 import duck.cameras.android.R;
 import duck.cameras.android.model.Callback;
 import duck.cameras.android.model.Camera;
+import duck.cameras.android.model.LoginToken;
 import duck.cameras.android.model.Result;
+import duck.cameras.android.model.Settings;
 import duck.cameras.android.model.XmlNode;
 import duck.cameras.android.util.DeviceUtils;
 
@@ -135,5 +138,48 @@ public class CameraFinder {
         String response = NetworkService.httpPost(url, resourceLoader.loadString(R.raw.ws_get_snapshot_uri, profileToken));
         XmlNode envelope = XmlParser.parse(response);
         return envelope.get("Body").get("GetSnapshotUriResponse").get("MediaUri").get("Uri").value();
+    }
+
+    public void findFromSettingsAsync(Context context, boolean update, Callback<List<Camera>> callback) {
+        new Thread(() -> {
+            try {
+                LoginToken loginToken = LocalSettingsManager.loadLoginToken(context);
+                Settings settings = SettingsLoader.load(context, update);
+                NetworkService.setMode(settings);
+
+                final ArrayList<Camera> result = new ArrayList<>();
+
+                for (Settings.EndPoint endPoint : settings.endPoints) {
+                    try {
+                        Camera camera = new Camera();
+                        camera.endPoint = endPoint.host + ":" + endPoint.localPort.command;
+                        camera.name = endPoint.name;
+                        Camera.Profile profile = new Camera.Profile();
+                        profile.token = endPoint.profile;
+                        profile.streamUri = createStreamUri(endPoint, loginToken);
+                        profile.snapshotUri = createSnapshotUri(endPoint, loginToken);
+                        camera.profiles.add(profile);
+                        result.add(camera);
+                    } catch (RuntimeException e) {
+                        Log.e(CameraFinder.class.getSimpleName(), e.getMessage(), e);
+                    }
+                }
+
+                callback.execute(Result.ok(result));
+            } catch (RuntimeException e) {
+                Log.e(CameraFinder.class.getSimpleName(), e.getMessage(), e);
+                callback.execute(Result.error(Collections.emptyList(), e));
+            }
+        }).start();
+    }
+
+    private String createStreamUri(Settings.EndPoint endPoint, LoginToken loginToken) {
+        String path = endPoint.streamPath.replace("{token}", loginToken.value());
+        return String.format("rtsp://%s:%s/%s", endPoint.host, endPoint.localPort.stream, path);
+    }
+
+    private String createSnapshotUri(Settings.EndPoint endPoint, LoginToken loginToken) {
+        String path = endPoint.snapshotPath.replace("{token}", loginToken.value());
+        return String.format("http://%s:%s/%s", endPoint.host, endPoint.localPort.snapshot, path);
     }
 }
