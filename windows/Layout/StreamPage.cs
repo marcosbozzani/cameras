@@ -90,7 +90,9 @@ namespace Duck.Cameras.Windows.Layout
             mediaPlayer = new MediaPlayer(libVLC);
             videoView.MediaPlayer = mediaPlayer;
             mediaPlayer.Vout += MediaPlayer_Vout;
-            mediaPlayer.Play(new Media(libVLC, new Uri(profile.StreamUri)));
+            var url = NetworkService.ProcessUrl(profile.StreamUri);
+            Log.Write("StreamUri", url);
+            mediaPlayer.Play(new Media(libVLC, new Uri(url)));
             Mute();
         }
 

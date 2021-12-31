@@ -131,12 +131,14 @@ namespace Duck.Cameras.Windows.Service
                         new Authority(settings.Router, endPoint.RemotePort.Snapshot));
             }
             string devicePublicIP = await GetDevicePublicIP(settings);
+            Log.Write("devicePublicIP", devicePublicIP);
             if (string.IsNullOrEmpty(devicePublicIP))
             {
                 mode = Mode.Local;
                 return;
             }
             string routerPublicIP = GetRouterPublicIP(settings);
+            Log.Write("routerPublicIP", routerPublicIP);
             if (string.IsNullOrEmpty(routerPublicIP))
             {
                 mode = Mode.Local;

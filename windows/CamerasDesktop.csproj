@@ -127,6 +127,7 @@
     <Compile Include="Service\CameraController.cs" />
     <Compile Include="Service\CameraFinder.cs" />
     <Compile Include="Service\LocalSettingsManager.cs" />
+    <Compile Include="Service\Log.cs" />
     <Compile Include="Service\MessageLoader.cs" />
     <Compile Include="Service\NetworkService.cs" />
     <Compile Include="Service\RemoteSettingsLoader.cs" />
