@@ -2,7 +2,6 @@
 using Duck.Cameras.Windows.Model;
 using Duck.Cameras.Windows.Service;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
@@ -12,7 +11,7 @@ using System.Windows.Forms;
 namespace Duck.Cameras.Windows.Layout
 {
     [DesignerCategory("Designer")]
-    public partial class MainPage : Page
+    public partial class MainPage : Page, IPageLifecycle
     {
         private Timer timer = new Timer();
 
@@ -22,22 +21,35 @@ namespace Duck.Cameras.Windows.Layout
 
             actionBar.AddButton(Theme.Icons.Settings()).Click += (o, e) =>
             {
-                MessageBox.Show(BuildConfig.BuildDate, "Version");
+                Navigator.Open(new SettingsPage());
             };
 
             actionBar.AddButton(Theme.Icons.Reload()).Click += async (o, e) =>
             {
-                await FindCameras();
+                await FindCameras(true);
             };
 
-            timer.Interval = 500;
+            timer.Enabled = false;
+            timer.Interval = 5000;
             timer.Tick += Timer_Tick;
-            timer.Enabled = true;
         }
 
-        private async void MainPage_Load(object sender, EventArgs e)
+        public void Resume()
         {
-            await FindCameras();
+            timer.Enabled = true;
+            if (LocalSettingsManager.IsComplete())
+            {
+                FindCameras(false).FireAndForget();
+            }
+            else
+            {
+                Navigator.Open(new SettingsPage());
+            }
+        }
+
+        public void Pause()
+        {
+            timer.Enabled = false;
         }
 
         private void Card_Click(object sender, EventArgs e)
@@ -51,28 +63,49 @@ namespace Duck.Cameras.Windows.Layout
             foreach (var card in grid.Controls.Cast<Card>())
             {
                 var camera = (Camera)card.Tag;
-                card.ImageLocation = camera.Profiles[0].SnapshotUri;
+                LoadImage(card, camera.Profiles[0].SnapshotUri);
             }
         }
 
-        private async Task FindCameras()
+        private async Task FindCameras(bool forceUpdate)
         {
             spinner.Show();
             grid.Controls.Clear();
-            var cameras = await new CameraFinder().FindAsync();
+            var cameras = await new CameraFinder().FindFromSettingsAsync(forceUpdate);
             foreach (var camera in cameras)
             {
                 int size = 22;
                 var card = new Card();
                 card.Tag = camera;
-                card.Title = camera.EndPoint;
+                card.Title = camera.Name ?? camera.EndPoint;
                 card.Margin = new Padding(5);
                 card.ImageSize = new Size(size * 16, size * 9);
-                card.ImageLocation = camera.Profiles[0].SnapshotUri;
-                card.Click += Card_Click;                
+                LoadImage(card, camera.Profiles[0].SnapshotUri);
+                card.Click += Card_Click;
                 grid.Controls.Add(card);
             }
             spinner.Hide();
+        }
+
+        private void LoadImage(Card card, string url)
+        {
+            NetworkService.HttpGetStreamAsync(url).ContinueWith(task =>
+            {
+                if (task.IsCompleted)
+                {
+                    if (card.Image != null)
+                    {
+                        card.Image.Dispose();
+                    }
+                    try
+                    {
+                        card.Image = Image.FromStream(task.Result);
+                    }
+                    catch { }
+                }
+            })
+            .FireAndForget();
+
         }
     }
 }

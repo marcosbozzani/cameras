@@ -65,17 +65,31 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\Button.cs" />
     <Compile Include="Controls\ControlGroup.cs" />
     <Compile Include="Controls\ControlUtil.cs" />
+    <Compile Include="Controls\Edit.cs" />
     <Compile Include="Controls\FloatButton.cs" />
     <Compile Include="Controls\DrawingUtil.cs" />
     <Compile Include="Controls\IKeyHandler.cs" />
+    <Compile Include="Controls\IPageLifecycle.cs" />
     <Compile Include="Controls\Spinner.cs" />
+    <Compile Include="Controls\Text.cs" />
     <Compile Include="Controls\Window.cs" />
+    <Compile Include="Layout\SettingsPage.cs">
+      <SubType>Designer</SubType>
+    </Compile>
+    <Compile Include="Layout\SettingsPage.Designer.cs">
+      <DependentUpon>SettingsPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Model\AsyncExtensions.cs" />
+    <Compile Include="Model\LoginToken.cs" />
     <Compile Include="Model\PtzData.cs" />
     <Compile Include="Model\PtzStatus.cs" />
     <Compile Include="Model\Result.cs" />
     <Compile Include="Model\RetryException.cs" />
+    <Compile Include="Model\RemoteSettings.cs" />
+    <Compile Include="Model\SettingsUrl.cs" />
     <Compile Include="Model\XContainerExtensions.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -112,11 +126,16 @@
     <Compile Include="Controls\Theme.cs" />
     <Compile Include="Service\CameraController.cs" />
     <Compile Include="Service\CameraFinder.cs" />
+    <Compile Include="Service\LocalSettingsManager.cs" />
     <Compile Include="Service\MessageLoader.cs" />
     <Compile Include="Service\NetworkService.cs" />
+    <Compile Include="Service\RemoteSettingsLoader.cs" />
     <Compile Include="Service\SoapParser.cs" />
     <EmbeddedResource Include="Layout\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Layout\SettingsPage.resx">
+      <DependentUpon>SettingsPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Layout\StreamPage.resx">
       <DependentUpon>StreamPage.cs</DependentUpon>
@@ -156,6 +175,7 @@
     <Content Include="Resources\ws_get_snapshot_uri.xml" />
     <Content Include="Resources\ws_get_status.xml" />
     <Content Include="Resources\ws_get_stream_uri.xml" />
+    <Content Include="Resources\ws_goto_preset.xml" />
     <Content Include="Resources\ws_stop.xml" />
     <None Include="Resources\icon_restore.svg" />
     <None Include="Resources\icon_close.svg" />
@@ -187,6 +207,9 @@
     </PackageReference>
     <PackageReference Include="VideoLAN.LibVLC.Windows">
       <Version>3.0.16</Version>
+    </PackageReference>
+    <PackageReference Include="YamlDotNet">
+      <Version>11.2.1</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup />

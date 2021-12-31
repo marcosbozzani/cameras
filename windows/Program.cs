@@ -19,5 +19,6 @@ namespace Duck.Cameras.Windows
     static partial class BuildConfig
     {
         public static readonly string BuildDate;
+        public static readonly string BuildType;
     }
 }

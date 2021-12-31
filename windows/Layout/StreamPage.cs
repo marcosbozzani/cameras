@@ -3,6 +3,7 @@ using Duck.Cameras.Windows.Model;
 using Duck.Cameras.Windows.Service;
 using LibVLCSharp.Shared;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
@@ -11,25 +12,29 @@ using static Duck.Cameras.Windows.Controls.Theme;
 namespace Duck.Cameras.Windows.Layout
 {
     [DesignerCategory("Designer")]
-    public partial class StreamPage : Page, IKeyHandler
+    public partial class StreamPage : Page, IKeyHandler, IPageLifecycle
     {
         private LibVLC libVLC;
         private MediaPlayer mediaPlayer;
         private Camera camera;
+        private CameraProfile profile;
         private CameraController cameraController;
-        private PtzData ptzData;
+        private RemoteSettingsEndPoint endPoint;
+        private List<Preset> presets;
+
+        private class Preset
+        {
+            public string Token;
+            public string Name;
+        }
 
         public StreamPage(Camera camera)
         {
             this.camera = camera;
+            profile = camera.Profiles[0];
             cameraController = new CameraController();
 
             InitializeComponent();
-
-            actionBar.AddButton(Theme.Icons.Settings()).Click += (o, e) =>
-            {
-                MessageBox.Show(BuildConfig.BuildDate, "Version");
-            };
 
             var leftIcon = Theme.Icons.Back(new IconData
             {
@@ -62,45 +67,148 @@ namespace Duck.Cameras.Windows.Layout
             downIcon.RotateFlip(RotateFlipType.Rotate270FlipNone);
             btnDown.Image = downIcon;
 
-            Load += StreamPage_Load;
+            var settings = RemoteSettingsLoader.LoadFromCache();
+            endPoint = settings.GetEndPoint(camera.EndPoint);
+            presets = CreatePresetList(endPoint.Presets);
+
             Disposed += StreamPage_Disposed;
             Resize += StreamPage_Resize;
 
-            btnLeft.Click += BtnLeft_Click;
-            btnRight.Click += BtnRight_Click;
-            btnUp.Click += BtnUp_Click;
-            btnDown.Click += BtnDown_Click;
-            videoOverlay.Click += VideoOverlay_Click;
+            SetupDiectionalButton(btnLeft, Keys.Left);
+            SetupDiectionalButton(btnRight, Keys.Right);
+            SetupDiectionalButton(btnUp, Keys.Up);
+            SetupDiectionalButton(btnDown, Keys.Down);
+            videoOverlay.Click += (o, e) => ToggleButtons();
+
+            CreateContextMenu(videoOverlay);
         }
 
-        private async void StreamPage_Load(object sender, EventArgs e)
+        public void Resume()
         {
+            ShowSpinner();
             libVLC = new LibVLC();
             mediaPlayer = new MediaPlayer(libVLC);
             videoView.MediaPlayer = mediaPlayer;
             mediaPlayer.Vout += MediaPlayer_Vout;
-            mediaPlayer.Play(new Media(libVLC, new Uri(camera.Profiles[0].StreamUri)));
+            mediaPlayer.Play(new Media(libVLC, new Uri(profile.StreamUri)));
+            Mute();
+        }
 
-            var result = await cameraController.LoadAsync(camera, camera.Profiles[0]);
-            if (result.Success)
+        public void Pause()
+        {
+            HideSpinner();
+            mediaPlayer.Pause();
+        }
+
+        public bool OnKeyDown(Keys key, bool repeat)
+        {
+            if (repeat)
             {
-                ptzData = result.Value;
+                return false;
             }
+            switch (key)
+            {
+                case Keys.Left:
+                    cameraController.MoveLeft(camera.EndPoint, profile.Token, endPoint.Speed);
+                    break;
+                case Keys.Right:
+                    cameraController.MoveRight(camera.EndPoint, profile.Token, endPoint.Speed);
+                    break;
+                case Keys.Up:
+                    cameraController.MoveUp(camera.EndPoint, profile.Token, endPoint.Speed);
+                    break;
+                case Keys.Down:
+                    cameraController.MoveDown(camera.EndPoint, profile.Token, endPoint.Speed);
+                    break;
+                default:
+                    return false;
+            }
+            return true;
+        }
+
+        public bool OnKeyUp(Keys key)
+        {
+            switch (key)
+            {
+                case Keys.Left:
+                case Keys.Right:
+                case Keys.Up:
+                case Keys.Down:
+                    cameraController.Stop(camera.EndPoint, profile.Token);
+                    break;
+                default:
+                    return false;
+            }
+            return true;
+        }
+
+        private void SetupDiectionalButton(FloatButton button, Keys key)
+        {
+            button.MouseDown += (o, e) => OnKeyDown(key, false);
+            button.MouseUp += (o, e) => OnKeyUp(key);
+        }
+
+        private List<Preset> CreatePresetList(IDictionary<string, string> presets)
+        {
+            var sortedKeys = new List<string>(presets.Keys);
+            sortedKeys.Sort((x, y) => x.CompareTo(y));
+
+            var list = new List<Preset>();
+            foreach (var key in sortedKeys)
+            {
+                Preset preset = new Preset();
+                preset.Token = key;
+                preset.Name = presets[key];
+                list.Add(preset);
+            }
+            return list;
+        }
+
+        private void CreateContextMenu(ControlGroup videoOverlay)
+        {
+            var menu = new ContextMenuStrip();
+            menu.Font = Theme.Fonts.Default();
+            menu.ShowImageMargin = false;
+            menu.Items.Add("Back").Click += (o, e) => Navigator.Back();
+            menu.Items.Add(IsMute() ? "Un-Mute" : "Mute").Click += (o, e) =>
+            {
+                var item = (ToolStripMenuItem)o;
+                if (IsMute())
+                {
+                    UnMute();
+                    item.Text = "Mute";
+                }
+                else
+                {
+                    Mute();
+                    item.Text = "Un-Mute";
+                }
+            };
+            foreach (var preset in presets)
+            {
+                menu.Items.Add(preset.Name).Click += (o, e) =>
+                {
+                    cameraController.GotoPreset(camera.EndPoint, profile.Token, preset.Token);
+                };
+            }
+            videoOverlay.ContextMenuStrip = menu;
         }
 
         private void MediaPlayer_Vout(object sender, MediaPlayerVoutEventArgs e)
         {
-            this.RunOnUiThread(() =>
-            {
-                spinner.Hide();
-                spinner.SendToBack();
-            });
+            this.RunOnUiThread(HideSpinner);
         }
 
         private void StreamPage_Disposed(object sender, EventArgs e)
         {
-            mediaPlayer.Dispose();
-            libVLC.Dispose();
+            if (mediaPlayer != null)
+            {
+                mediaPlayer.Dispose();
+            }
+            if (libVLC != null)
+            {
+                libVLC.Dispose();
+            }
         }
 
         private void StreamPage_Resize(object sender, EventArgs e)
@@ -120,45 +228,7 @@ namespace Duck.Cameras.Windows.Layout
             btnDown.Top = videoOverlay.Top + videoOverlay.Height - btnDown.Height - margin;
         }
 
-        private void BtnLeft_Click(object sender, EventArgs e)
-        {
-            if (ptzData != null)
-            {
-                cameraController.MoveLeft(ptzData);
-            }
-
-        }
-
-        private void BtnRight_Click(object sender, EventArgs e)
-        {
-            if (ptzData != null)
-            {
-                cameraController.MoveRight(ptzData);
-            }
-        }
-
-        private void BtnUp_Click(object sender, EventArgs e)
-        {
-            if (ptzData != null)
-            {
-                cameraController.MoveUp(ptzData);
-            }
-        }
-
-        private void BtnDown_Click(object sender, EventArgs e)
-        {
-            if (ptzData != null)
-            {
-                cameraController.MoveDown(ptzData);
-            }
-        }
-
-        private void VideoOverlay_Click(object sender, EventArgs e)
-        {
-            ToogleButtons();
-        }
-
-        private void ToogleButtons()
+        private void ToggleButtons()
         {
             if (btnLeft.Visible)
             {
@@ -176,26 +246,41 @@ namespace Duck.Cameras.Windows.Layout
             }
         }
 
-        public void HandleKey(Keys key)
+        private void Mute()
         {
-            if (ptzData != null)
+            if (mediaPlayer != null)
             {
-                switch (key)
-                {
-                    case Keys.Left:
-                        cameraController.MoveLeft(ptzData);
-                        break;
-                    case Keys.Right:
-                        cameraController.MoveRight(ptzData);
-                        break;
-                    case Keys.Up:
-                        cameraController.MoveUp(ptzData);
-                        break;
-                    case Keys.Down:
-                        cameraController.MoveDown(ptzData);
-                        break;
-                }
+                mediaPlayer.Volume = 0;
             }
+        }
+
+        private void UnMute()
+        {
+            if (mediaPlayer != null)
+            {
+                mediaPlayer.Volume = 100;
+            }
+        }
+
+        private bool IsMute()
+        {
+            if (mediaPlayer == null)
+            {
+                return true;
+            }
+            return mediaPlayer.Volume == 0;
+        }
+
+        private void HideSpinner()
+        {
+            spinner.Hide();
+            spinner.SendToBack();
+        }
+
+        private void ShowSpinner()
+        {
+            spinner.BringToFront();
+            spinner.Show();
         }
     }
 }

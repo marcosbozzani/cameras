@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Duck.Cameras.Windows.Controls
@@ -9,12 +10,17 @@ namespace Duck.Cameras.Windows.Controls
         {
             if (control.InvokeRequired)
             {
-                control.Invoke(action);
+                control.BeginInvoke(action);
             }
             else
             {
                 action();
             }
+        }
+
+        public static void DelayedRun(this Control control, Action action, int milisDelay = 0)
+        {
+            Task.Delay(milisDelay).ContinueWith(_ => control.BeginInvoke(action));
         }
     }
 }

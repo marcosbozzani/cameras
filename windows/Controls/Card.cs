@@ -96,14 +96,6 @@ namespace Duck.Cameras.Windows.Controls
 
         [Browsable(true)]
         [Category("Appearance")]
-        public string ImageLocation
-        {
-            get { return pictureBox.ImageLocation; }
-            set { pictureBox.ImageLocation = value; }
-        }
-
-        [Browsable(true)]
-        [Category("Appearance")]
         public Size ImageSize
         {
             get { return pictureBox.Size; }

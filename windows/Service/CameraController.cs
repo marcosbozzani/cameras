@@ -12,7 +12,8 @@ namespace Duck.Cameras.Windows.Service
 {
     public class CameraController
     {
-        private Timer moveTimer;
+        private bool isMoving = false;
+        private static readonly Action emptyAction = () => { };
 
         public async Task<Result<PtzData>> LoadAsync(Camera camera, CameraProfile profile)
         {
@@ -141,46 +142,74 @@ namespace Duck.Cameras.Windows.Service
 
         public void MoveLeft(PtzData ptzData)
         {
-            Move(ptzData, -1, 0);
+            MoveLeft(ptzData.Camera.EndPoint, ptzData.Profile.Token, 1);
         }
 
         public void MoveRight(PtzData ptzData)
         {
-            Move(ptzData, +1, 0);
+            MoveRight(ptzData.Camera.EndPoint, ptzData.Profile.Token, 1);
         }
 
         public void MoveUp(PtzData ptzData)
         {
-            Move(ptzData, 0, +1);
+            MoveUp(ptzData.Camera.EndPoint, ptzData.Profile.Token, 1);
         }
 
         public void MoveDown(PtzData ptzData)
         {
-            Move(ptzData, 0, -1);
+            MoveDown(ptzData.Camera.EndPoint, ptzData.Profile.Token, 1);
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        private void Move(PtzData ptzData, double x, double y)
+        public void MoveLeft(string endPoint, string profileToken, double speed)
         {
-            if (moveTimer == null)
-            {
-                double delta = 0.2;
-                var url = "http://" + ptzData.Camera.EndPoint + "/onvif/PTZ";
-                var data = MessageLoader.Load(Resources.ws_continuous_move, ptzData.Profile.Token, x * delta, y * delta);
-                NetworkService.HttpPostAsync(url, data).GetAwaiter();
+            Move(endPoint, profileToken, speed, -1, 0);
+        }
 
-                moveTimer = new Timer((state) =>
-                {
-                    Stop(ptzData);
-                    moveTimer = null;
-                }, null, 500, Timeout.Infinite);
-            }
+        public void MoveRight(string endPoint, string profileToken, double speed)
+        {
+            Move(endPoint, profileToken, speed, +1, 0);
+        }
+
+        public void MoveUp(string endPoint, string profileToken, double speed)
+        {
+            Move(endPoint, profileToken, speed, 0, +1);
+        }
+
+        public void MoveDown(string endPoint, string profileToken, double speed)
+        {
+            Move(endPoint, profileToken, speed, 0, -1);
         }
 
         public void Stop(PtzData ptzData)
         {
-            var url = "http://" + ptzData.Camera.EndPoint + "/onvif/PTZ";
-            NetworkService.HttpPostAsync(url, MessageLoader.Load(Resources.ws_stop, ptzData.Profile.Token)).GetAwaiter();
+            Stop(ptzData.Camera.EndPoint, ptzData.Profile.Token);
+        }
+
+        public void Stop(string endPoint, string profileToken)
+        {
+            Run(endPoint, () => isMoving = false, Resources.ws_stop, profileToken);
+        }
+
+        public void GotoPreset(string endPoint, string profileToken, string presetToken)
+        {
+            Run(endPoint, emptyAction, Resources.ws_goto_preset, profileToken, presetToken);
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        private void Move(string endPoint, string profileToken, double speed, double x, double y)
+        {
+            if (!isMoving)
+            {
+                isMoving = true;
+                Run(endPoint, emptyAction, Resources.ws_continuous_move, profileToken, x * speed, y * speed);
+            }
+        }
+
+        private void Run(string endPoint, Action callback, string resource, params object[] args)
+        {
+            var url = "http://" + endPoint + "/onvif/ptz_service";
+            var data = MessageLoader.Load(resource, args);
+            NetworkService.HttpPostAsync(url, data).ContinueWith(task => callback()).FireAndForget();
         }
     }
 }

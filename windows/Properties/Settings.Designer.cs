@@ -22,5 +22,41 @@ namespace Duck.Cameras.Windows.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LoginToken {
+            get {
+                return ((string)(this["LoginToken"]));
+            }
+            set {
+                this["LoginToken"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SettingsUrl {
+            get {
+                return ((string)(this["SettingsUrl"]));
+            }
+            set {
+                this["SettingsUrl"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SettingsCache {
+            get {
+                return ((string)(this["SettingsCache"]));
+            }
+            set {
+                this["SettingsCache"] = value;
+            }
+        }
     }
 }

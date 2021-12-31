@@ -2,6 +2,7 @@
 using Duck.Cameras.Windows.Properties;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -124,6 +125,49 @@ namespace Duck.Cameras.Windows.Service
             var response = await NetworkService.HttpPostAsync(url, MessageLoader.Load(Resources.ws_get_snapshot_uri, profileToken));
 
             return SoapParser.Parse(response).Get("GetSnapshotUriResponse").Get("MediaUri").Get("Uri").Value;
+        }
+
+        public async Task<IEnumerable<Camera>> FindFromSettingsAsync(bool update)
+        {
+            LoginToken loginToken = LocalSettingsManager.LoadLoginToken();
+            RemoteSettings settings = await RemoteSettingsLoader.LoadAsync(update);
+            await NetworkService.SetMode(settings);
+
+            List<Camera> result = new List<Camera>();
+
+            foreach (var endPoint in settings.EndPoints)
+            {
+                try
+                {
+                    Camera camera = new Camera();
+                    camera.EndPoint = endPoint.Host + ":" + endPoint.LocalPort.Command;
+                    camera.Name = endPoint.Name;
+                    CameraProfile profile = new CameraProfile();
+                    profile.Token = endPoint.Profile;
+                    profile.StreamUri = CreateStreamUri(endPoint, loginToken);
+                    profile.SnapshotUri = CreateSnapshotUri(endPoint, loginToken);
+                    camera.Profiles.Add(profile);
+                    result.Add(camera);
+                }
+                catch (Exception e)
+                {                    
+                    Debug.Write(e, nameof(CameraFinder.FindFromSettingsAsync));
+                }
+            }
+
+            return result;
+        }
+
+        private string CreateStreamUri(RemoteSettingsEndPoint endPoint, LoginToken loginToken)
+        {
+            string path = endPoint.StreamPath.Replace("{token}", loginToken.Value);
+            return string.Format("rtsp://{0}:{1}/{2}", endPoint.Host, endPoint.LocalPort.Stream, path);
+        }
+
+        private string CreateSnapshotUri(RemoteSettingsEndPoint endPoint, LoginToken loginToken)
+        {
+            string path = endPoint.SnapshotPath.Replace("{token}", loginToken.Value);
+            return string.Format("http://{0}:{1}/{2}", endPoint.Host, endPoint.LocalPort.Snapshot, path);
         }
     }
 }

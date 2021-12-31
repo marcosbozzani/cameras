@@ -288,9 +288,9 @@ namespace Duck.Cameras.Windows.Properties {
         ///   Looks up a localized string similar to &lt;s:Envelope xmlns:s=&quot;http://www.w3.org/2003/05/soap-envelope&quot;&gt;
         ///    &lt;s:Body&gt;
         ///        &lt;ContinuousMove xmlns=&quot;http://www.onvif.org/ver20/ptz/wsdl&quot;&gt;
-        ///            &lt;ProfileToken&gt;%1$s&lt;/ProfileToken&gt;
+        ///            &lt;ProfileToken&gt;{0:s}&lt;/ProfileToken&gt;
         ///            &lt;Velocity&gt;
-        ///                &lt;PanTilt x=&quot;%2$f&quot; y=&quot;%3$f&quot; xmlns=&quot;http://www.onvif.org/ver10/schema&quot; /&gt;
+        ///                &lt;PanTilt x=&quot;{1:f}&quot; y=&quot;{2:f}&quot; xmlns=&quot;http://www.onvif.org/ver10/schema&quot; /&gt;
         ///            &lt;/Velocity&gt;
         ///        &lt;/ContinuousMove&gt;
         ///    &lt;/s:Body&gt;
@@ -309,9 +309,9 @@ namespace Duck.Cameras.Windows.Properties {
         ///    xmlns:tns=&quot;http://schemas.xmlsoap.org/ws/2005/04/discovery&quot;
         ///    xmlns:wsa=&quot;http://schemas.xmlsoap.org/ws/2004/08/addressing&quot;&gt;
         ///    &lt;soap:Header&gt;
-        ///        &lt;wsa:MessageID&gt;urn:uuid:%1$s&lt;/wsa:MessageID&gt;
+        ///        &lt;wsa:MessageID&gt;urn:uuid:{0:s}&lt;/wsa:MessageID&gt;
         ///        &lt;wsa:To&gt;urn:schemas-xmlsoap-org:ws:2005:04:discovery&lt;/wsa:To&gt;
-        ///        &lt;wsa:Action&gt;http://schemas.xmlsoap.org/ws/2005/04/discovery/Pro [rest of string was truncated]&quot;;.
+        ///        &lt;wsa:Action&gt;http://schemas.xmlsoap.org/ws/2005/04/discovery/Pr [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string ws_discovery_probe {
             get {
@@ -355,7 +355,7 @@ namespace Duck.Cameras.Windows.Properties {
         ///    xmlns:tptz=&quot;http://www.onvif.org/ver20/ptz/wsdl&quot;&gt;
         ///    &lt;soap:Body&gt;
         ///        &lt;tptz:GetConfigurationOptions&gt;
-        ///            &lt;tptz:ConfigurationToken&gt;%1$s&lt;/tptz:ConfigurationToken&gt;
+        ///            &lt;tptz:ConfigurationToken&gt;{0:s}&lt;/tptz:ConfigurationToken&gt;
         ///        &lt;/tptz:GetConfigurationOptions&gt;
         ///    &lt;/soap:Body&gt;
         ///&lt;/soap:Envelope&gt;.
@@ -419,7 +419,7 @@ namespace Duck.Cameras.Windows.Properties {
         ///    xmlns:trt=&quot;http://www.onvif.org/ver10/media/wsdl&quot;&gt;
         ///    &lt;soap:Body&gt;
         ///        &lt;trt:GetSnapshotUri&gt;
-        ///            &lt;trt:ProfileToken&gt;%1$s&lt;/trt:ProfileToken&gt;
+        ///            &lt;trt:ProfileToken&gt;{0:s}&lt;/trt:ProfileToken&gt;
         ///        &lt;/trt:GetSnapshotUri&gt;
         ///    &lt;/soap:Body&gt;
         ///&lt;/soap:Envelope&gt;
@@ -437,7 +437,7 @@ namespace Duck.Cameras.Windows.Properties {
         ///    xmlns:trt=&quot;http://www.onvif.org/ver10/media/wsdl&quot;&gt;
         ///    &lt;soap:Body&gt;
         ///        &lt;tptz:GetStatus&gt;
-        ///            &lt;trt:ProfileToken&gt;%1$s&lt;/trt:ProfileToken&gt;
+        ///            &lt;trt:ProfileToken&gt;{0:s}&lt;/trt:ProfileToken&gt;
         ///        &lt;/tptz:GetStatus&gt;
         ///    &lt;/soap:Body&gt;
         ///&lt;/soap:Envelope&gt;.
@@ -472,8 +472,24 @@ namespace Duck.Cameras.Windows.Properties {
         /// <summary>
         ///   Looks up a localized string similar to &lt;s:Envelope xmlns:s=&quot;http://www.w3.org/2003/05/soap-envelope&quot;&gt;
         ///    &lt;s:Body&gt;
+        ///        &lt;GotoPreset xmlns=&quot;http://www.onvif.org/ver20/ptz/wsdl&quot;&gt;
+        ///            &lt;ProfileToken&gt;{0:s}&lt;/ProfileToken&gt;
+        ///            &lt;PresetToken&gt;{1:s}&lt;/PresetToken&gt;
+        ///        &lt;/GotoPreset&gt;
+        ///    &lt;/s:Body&gt;
+        ///&lt;/s:Envelope&gt;.
+        /// </summary>
+        internal static string ws_goto_preset {
+            get {
+                return ResourceManager.GetString("ws_goto_preset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;s:Envelope xmlns:s=&quot;http://www.w3.org/2003/05/soap-envelope&quot;&gt;
+        ///    &lt;s:Body&gt;
         ///        &lt;Stop xmlns=&quot;http://www.onvif.org/ver20/ptz/wsdl&quot;&gt;
-        ///            &lt;ProfileToken&gt;%1$s&lt;/ProfileToken&gt;
+        ///            &lt;ProfileToken&gt;{0:s}&lt;/ProfileToken&gt;
         ///            &lt;PanTilt&gt;true&lt;/PanTilt&gt;
         ///            &lt;Zoom&gt;true&lt;/Zoom&gt;
         ///        &lt;/Stop&gt;

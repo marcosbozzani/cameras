@@ -8,11 +8,12 @@ namespace Duck.Cameras.Windows.Model
         public List<CameraService> Services;
         public CameraInformation Information;
         public List<CameraProfile> Profiles;
+        public string Name;
 
         public Camera()
         {
             Services = new List<CameraService>();
-            @Information = new CameraInformation();
+            Information = new CameraInformation();
             Profiles = new List<CameraProfile>();
         }
     }

@@ -8,6 +8,7 @@
 					static BuildConfig()
 					{
 						BuildDate = &quot;$([System.DateTime]::UtcNow.ToString(&quot;o&quot;))&quot;%3B
+						BuildType = &quot;$(Configuration)&quot;%3B
 					}
 				}
 			}

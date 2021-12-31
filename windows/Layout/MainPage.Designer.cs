@@ -80,7 +80,6 @@ namespace Duck.Cameras.Windows.Layout
             this.Controls.Add(this.grid);
             this.Controls.Add(this.actionBar);
             this.Name = "MainPage";
-            this.Load += new System.EventHandler(this.MainPage_Load);
             this.ResumeLayout(false);
 
         }
