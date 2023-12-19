@@ -39,17 +39,21 @@ public class StreamActivity extends Activity implements VlcPlayer.EventListener 
         super.onCreate(savedInstanceState);
         binding = StreamActivityBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+
+        hideButtons();
 
         camera = (Camera) getIntent().getSerializableExtra("camera");
         profile = camera.profiles.get(0);
-        Settings settings = SettingsLoader.load(this, false);
-        endPoint = settings.getEndPoint(camera.endPoint);
-        presets = createPresetList(endPoint.presets);
-        cameraController = new CameraController(new ResourceLoader(getResources()));
 
-        hideButtons();
-        setClickListeners();
+        SettingsLoader.loadAsync(this, false, result -> {
+            if (result.ok()) {
+                Settings settings = result.value();
+                endPoint = settings.getEndPoint(camera.endPoint);
+                presets = createPresetList(endPoint.presets);
+                cameraController = new CameraController(new ResourceLoader(getResources()));
+                setClickListeners();
+            }
+        });
     }
 
     private List<Preset> createPresetList(Map<String, String> presets) {

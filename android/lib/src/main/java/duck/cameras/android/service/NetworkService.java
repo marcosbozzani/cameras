@@ -1,5 +1,7 @@
 package duck.cameras.android.service;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import java.io.IOException;
@@ -272,6 +274,15 @@ public class NetworkService {
 
     public static long ipToLong(String ip) {
         try {
+            String[] splat = ip.split("@");
+            if (splat.length == 2) {
+                ip = splat[1];
+            }
+            splat = ip.split(":");
+            if (splat.length == 2) {
+                ip = splat[0];
+            }
+            Log.d("ipToLong:ip", ip);
             InetAddress inetAddress = InetAddress.getByName(ip);
             ByteBuffer buffer = ByteBuffer.allocate(8).order(ByteOrder.BIG_ENDIAN);
             buffer.put(new byte[]{0, 0, 0, 0});

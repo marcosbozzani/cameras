@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 ThreadUtils.runOnUiThread(adapter::update);
             }
-        }, 0, 5000);
+        }, 0, 1000);
     }
 
     @Override
@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public long getItemId(int position) {
             Camera camera = items.get(position);
-            long id = NetworkService.ipToLong(camera.endPoint.split(":")[0]);;
+            long id = NetworkService.ipToLong(camera.endPoint);
             return id;
         }
 
