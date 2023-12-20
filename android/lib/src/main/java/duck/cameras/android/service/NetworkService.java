@@ -271,26 +271,4 @@ public class NetworkService {
             throw new RuntimeException(e);
         }
     }
-
-    public static long ipToLong(String ip) {
-        try {
-            String[] splat = ip.split("@");
-            if (splat.length == 2) {
-                ip = splat[1];
-            }
-            splat = ip.split(":");
-            if (splat.length == 2) {
-                ip = splat[0];
-            }
-            Log.d("ipToLong:ip", ip);
-            InetAddress inetAddress = InetAddress.getByName(ip);
-            ByteBuffer buffer = ByteBuffer.allocate(8).order(ByteOrder.BIG_ENDIAN);
-            buffer.put(new byte[]{0, 0, 0, 0});
-            buffer.put(inetAddress.getAddress());
-            buffer.position(0);
-            return buffer.getLong();
-        } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

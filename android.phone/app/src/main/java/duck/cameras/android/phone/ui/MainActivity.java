@@ -161,8 +161,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public long getItemId(int position) {
             Camera camera = items.get(position);
-            long id = NetworkService.ipToLong(camera.endPoint);
-            return id;
+            return camera.endPoint.hashCode();
         }
 
         @Override
