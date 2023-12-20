@@ -1,7 +1,5 @@
 package duck.cameras.android.service;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 
 import java.io.IOException;
@@ -16,8 +14,6 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -110,6 +106,20 @@ public class NetworkService {
         }
         HttpUrl url = HttpUrl.parse(tempUrlString);
         String key = url.host() + ":" + url.port();
+
+        if (!url.password().isEmpty() || !url.username().isEmpty()) {
+            key = "@" + key;
+        }
+        if (!url.password().isEmpty()) {
+            key = url.password() + key;
+        }
+        if (!url.username().isEmpty()) {
+            if (!url.password().isEmpty()) {
+                key = ":" + key;
+            }
+            key = url.username() + key;
+        }
+
         if (forwardingMap.containsKey(key)) {
             Authority value = forwardingMap.get(key);
             HttpUrl newUrl = url.newBuilder()
