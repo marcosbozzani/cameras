@@ -194,6 +194,13 @@ public class MainActivity extends AppCompatActivity {
                                 cardView.setTag(null);
                                 imageView.setImageDrawable(null);
                             }
+
+                            @Override
+                            public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                                cardView.setTag(null);
+                                imageView.setImageDrawable(null);
+                            }
+
                         });
             }
         }
