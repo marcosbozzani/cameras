@@ -145,7 +145,6 @@ public class CameraFinder {
             try {
                 LoginToken loginToken = LocalSettingsManager.loadLoginToken(context);
                 Settings settings = SettingsLoader.load(context, update);
-                NetworkService.setMode(settings);
 
                 final ArrayList<Camera> result = new ArrayList<>();
 
