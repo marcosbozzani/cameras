@@ -1,7 +1,6 @@
 package duck.cameras.android.phone.ui;
 
 import android.app.Activity;
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.MenuItem;

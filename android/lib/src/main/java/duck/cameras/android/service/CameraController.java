@@ -4,9 +4,6 @@ import android.util.Log;
 
 import androidx.annotation.RawRes;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import duck.cameras.android.R;
 import duck.cameras.android.model.Callback;
 import duck.cameras.android.model.Camera;

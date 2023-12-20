@@ -1,7 +1,5 @@
 package duck.cameras.android.model;
 
-import androidx.annotation.Nullable;
-
 import java.util.ArrayList;
 
 public class RetryException extends RuntimeException {
