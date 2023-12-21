@@ -21,7 +21,7 @@ public class SettingsLoader {
                 .getSharedPreferences("duck.cameras.android.service.Settings", Context.MODE_PRIVATE);
         String data = sharedPreferences.getString("data", null);
         if (data == null || update) {
-            SettingsUrl settingsUrl = LocalSettingsManager.loadSettingsUrl(context);
+            SettingsUrl settingsUrl = LocalSettingsManager.getSettingsUrl(context);
             if (settingsUrl.isEmpty()) {
                 throw new RuntimeException("settingsUrl is null");
             }

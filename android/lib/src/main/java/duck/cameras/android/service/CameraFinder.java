@@ -143,7 +143,7 @@ public class CameraFinder {
     public void findFromSettingsAsync(Context context, boolean update, Callback<List<Camera>> callback) {
         new Thread(() -> {
             try {
-                LoginToken loginToken = LocalSettingsManager.loadLoginToken(context);
+                LoginToken loginToken = LocalSettingsManager.getLoginToken(context);
                 Settings settings = SettingsLoader.load(context, update);
 
                 final ArrayList<Camera> result = new ArrayList<>();

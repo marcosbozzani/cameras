@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        if (!LocalSettingsManager.isComplete(this)) {
+        if (!LocalSettingsManager.isCompleted(this)) {
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
             return;
