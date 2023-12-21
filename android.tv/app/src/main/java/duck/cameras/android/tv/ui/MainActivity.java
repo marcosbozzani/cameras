@@ -68,7 +68,7 @@ public class MainActivity extends FragmentActivity {
         public void onResume() {
             super.onResume();
 
-            if (!LocalSettingsManager.isComplete(getContext())) {
+            if (!LocalSettingsManager.isCompleted(getContext())) {
                 Intent intent = new Intent(getContext(), SettingsActivity.class);
                 startActivity(intent);
                 return;

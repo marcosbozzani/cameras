@@ -24,8 +24,8 @@ public class SettingsActivity extends FragmentActivity {
         binding = SettingsActivityBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        LoginToken loginToken = LocalSettingsManager.loadLoginToken(this);
-        SettingsUrl settingsUrl = LocalSettingsManager.loadSettingsUrl(this);
+        LoginToken loginToken = LocalSettingsManager.getLoginToken(this);
+        SettingsUrl settingsUrl = LocalSettingsManager.getSettingsUrl(this);
 
         binding.txtVersion.setText(String.format("%s (%s)", BuildConfig.BUILD_TIME, BuildConfig.BUILD_TYPE));
         binding.edtToken.setText(loginToken.value());
@@ -33,10 +33,8 @@ public class SettingsActivity extends FragmentActivity {
 
         binding.btnSave.setOnClickListener(view -> {
             String loginTokenText = binding.edtToken.getText().toString();
-            LocalSettingsManager.saveLoginToken(this, new LoginToken(loginTokenText));
-
             String settingsUrlText = binding.edtSettingsUrl.getText().toString();
-            LocalSettingsManager.saveSettingsUrl(this, new SettingsUrl(settingsUrlText));
+            LocalSettingsManager.save(this, new LoginToken(loginTokenText), new SettingsUrl(settingsUrlText));
 
             new Thread(() -> {
                 try {
