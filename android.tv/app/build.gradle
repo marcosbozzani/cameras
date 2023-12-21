@@ -1,3 +1,5 @@
+import java.time.format.DateTimeFormatter
+
 plugins {
     id 'com.android.application'
 }
@@ -10,17 +12,26 @@ android {
         minSdk 21
         targetSdk 31
         versionCode 1
-        versionName "1.0"
+        def dateFormatter = DateTimeFormatter
+                .ofPattern("yyyy-MM-dd'T'HH-mm-ss'Z'")
+                .withZone(ZoneId.from(ZoneOffset.UTC))
+        versionName "${dateFormatter.format(Instant.now())}"
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "${applicationId}_${variant.buildType.name}_${defaultConfig.versionName}.apk"
+        }
     }
 
     buildTypes {
         debug {
-            buildConfigField("String", "BUILD_TIME", "\"${Instant.ofEpochMilli(System.currentTimeMillis()).toString()}\"")
+            buildConfigField("String", "BUILD_TIME", "\"${defaultConfig.versionName}\"")
         }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            buildConfigField("String", "BUILD_TIME", "\"${Instant.ofEpochMilli(System.currentTimeMillis()).toString()}\"")
+            buildConfigField("String", "BUILD_TIME", "\"${defaultConfig.versionName}\"")
         }
     }
 
