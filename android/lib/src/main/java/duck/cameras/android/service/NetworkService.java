@@ -1,5 +1,7 @@
 package duck.cameras.android.service;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import java.io.IOException;
@@ -182,7 +184,8 @@ public class NetworkService {
                 String ip = NetworkService.httpGet(resolver).trim();
                 Integer val = rank.get(ip);
                 rank.put(ip, val == null ? 1 : val + 1);
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                Log.e(NetworkService.class.getSimpleName(), e.getMessage(), e);
             }
         }
         Map.Entry<String, Integer> mode = null;
@@ -197,7 +200,8 @@ public class NetworkService {
         for (String resolver : settings.resolvers) {
             try {
                 return NetworkService.httpGet(resolver).trim();
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                Log.e(NetworkService.class.getSimpleName(), e.getMessage(), e);
             }
         }
         return "";
@@ -206,7 +210,8 @@ public class NetworkService {
     public static String getRouterPublicIP(Settings settings) {
         try {
             return InetAddress.getByName(settings.router).getHostAddress();
-        } catch (UnknownHostException ignored) {
+        } catch (UnknownHostException e) {
+            Log.e(NetworkService.class.getSimpleName(), e.getMessage(), e);
             return "";
         }
     }
