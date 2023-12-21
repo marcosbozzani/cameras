@@ -11,7 +11,6 @@ import duck.cameras.android.model.SettingsUrl;
 import duck.cameras.android.service.LocalSettingsManager;
 import duck.cameras.android.service.SettingsLoader;
 import duck.cameras.android.tv.BuildConfig;
-import duck.cameras.android.tv.R;
 import duck.cameras.android.tv.databinding.SettingsActivityBinding;
 import duck.cameras.android.util.ThreadUtils;
 

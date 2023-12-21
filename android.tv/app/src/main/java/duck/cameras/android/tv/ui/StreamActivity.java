@@ -19,8 +19,6 @@ import java.util.Map;
 
 import duck.cameras.android.model.Camera;
 import duck.cameras.android.model.Preset;
-import duck.cameras.android.model.PtzData;
-import duck.cameras.android.model.Result;
 import duck.cameras.android.model.Settings;
 import duck.cameras.android.service.CameraController;
 import duck.cameras.android.service.ResourceLoader;
