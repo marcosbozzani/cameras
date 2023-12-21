@@ -1,6 +1,7 @@
 package duck.cameras.android.phone.ui;
 
 import android.app.Activity;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.MenuItem;
@@ -38,8 +39,9 @@ public class StreamActivity extends Activity implements VlcPlayer.EventListener 
         super.onCreate(savedInstanceState);
         binding = StreamActivityBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
         hideButtons();
+        hideStatusBar();
 
         camera = (Camera) getIntent().getSerializableExtra("camera");
         profile = camera.profiles.get(0);
@@ -171,6 +173,11 @@ public class StreamActivity extends Activity implements VlcPlayer.EventListener 
                 return false;
             }
         });
+    }
+
+    private void hideStatusBar() {
+        getActionBar().hide();
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
     }
 
     private void hideButtons() {
