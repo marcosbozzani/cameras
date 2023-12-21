@@ -27,6 +27,7 @@ import duck.cameras.android.model.Camera;
 import duck.cameras.android.model.LoadListener;
 import duck.cameras.android.model.Result;
 import duck.cameras.android.service.CameraFinder;
+import duck.cameras.android.service.NetworkService;
 import duck.cameras.android.util.ThreadUtils;
 
 public class CamerasRow extends ListRow {
@@ -104,9 +105,10 @@ public class CamerasRow extends ListRow {
 
             if (card.getTag() == null) {
                 card.setTag("loading");
+                String snapshotUri = camera.profiles.get(0).snapshotUri;
                 Glide.with(card.getContext()).clear(card.getMainImageView());
                 Glide.with(card.getContext())
-                        .load(camera.profiles.get(0).snapshotUri)
+                        .load(NetworkService.processUrl(snapshotUri))
                         .diskCacheStrategy(DiskCacheStrategy.NONE)
                         .signature(new ObjectKey(UUID.randomUUID()))
                         .into(new CustomTarget<Drawable>() {
