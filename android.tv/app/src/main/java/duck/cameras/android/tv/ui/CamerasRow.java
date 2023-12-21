@@ -122,6 +122,12 @@ public class CamerasRow extends ListRow {
                                 card.setTag(null);
                                 card.getMainImageView().setImageDrawable(null);
                             }
+
+                            @Override
+                            public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                                card.setTag(null);
+                                card.getMainImageView().setImageDrawable(null);
+                            }
                         });
             }
         }
