@@ -1,11 +1,17 @@
 package duck.cameras.android.phone.ui;
 
+import android.app.ActionBar;
 import android.app.Activity;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,8 +44,9 @@ public class StreamActivity extends Activity implements VlcPlayer.EventListener 
         super.onCreate(savedInstanceState);
         binding = StreamActivityBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
         hideButtons();
+        hideSystemUI();
 
         camera = (Camera) getIntent().getSerializableExtra("camera");
         profile = camera.profiles.get(0);
@@ -171,6 +178,13 @@ public class StreamActivity extends Activity implements VlcPlayer.EventListener 
                 return false;
             }
         });
+    }
+
+    private void hideSystemUI() {
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        WindowInsetsControllerCompat controller = new WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView());
+        controller.hide(WindowInsetsCompat.Type.systemBars());
+        controller.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
     }
 
     private void hideButtons() {
