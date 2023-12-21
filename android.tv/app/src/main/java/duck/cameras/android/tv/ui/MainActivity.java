@@ -82,7 +82,7 @@ public class MainActivity extends FragmentActivity {
                 public void run() {
                     ThreadUtils.runOnUiThread(camerasRow::update);
                 }
-            }, 0, 5000);
+            }, 0, 1000);
         }
 
         @Override
