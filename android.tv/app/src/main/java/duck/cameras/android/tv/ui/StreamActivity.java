@@ -1,6 +1,7 @@
 package duck.cameras.android.tv.ui;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -50,12 +51,18 @@ public class StreamActivity extends FragmentActivity implements EventListener {
 
         camera = (Camera) getIntent().getSerializableExtra("camera");
         profile = camera.profiles.get(0);
-        Settings settings = SettingsLoader.load(this, false);
-        endPoint = settings.getEndPoint(camera.endPoint);
-        presets = createPresetList(endPoint.presets);
-        cameraController = new CameraController(new ResourceLoader(getResources()));
 
-        registerForContextMenu(surface);
+        SettingsLoader.loadAsync(this, false, result -> {
+            if (result.ok()) {
+                endPoint = result.value().getEndPoint(camera.endPoint);
+                presets = createPresetList(endPoint.presets);
+                cameraController = new CameraController(new ResourceLoader(getResources()));
+
+                registerForContextMenu(surface);
+            } else {
+                Log.e(StreamActivity.class.getSimpleName(), "SettingsLoader.loadAsync failed");
+            }
+        });
     }
 
     private List<Preset> createPresetList(Map<String, String> presets) {
