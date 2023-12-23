@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Cameras</title>
+        <style>
+            body {
+                color: #FFFFFF;
+                background: #262626;
+                font-size: 24px;
+                font-family: "sans-serif";
+
+                margin: 0;
+            }
+            h1 {
+                background: #BC0032;
+                font-size: 1.6em;
+                text-align: center;
+
+                margin-top: 0;
+                padding: 8px 0;
+            }
+            .container {
+                width: 95%;
+                max-width: 480px;
+                margin: auto;
+            }
+            .container label {
+                font-size: 0.7em;
+
+                display: block;
+            }
+            .container input {
+                color: #FFFFFF;
+                background: transparent;
+                font-size: 1em;
+
+                width: 100%;
+                margin: 4px 0 28px;
+                padding: 8px 0;
+
+                outline: 0;
+                border: 0;
+                border-bottom: 2px solid #FFFFFF;
+            }
+            .container button {
+                color: #FFFFFF;
+                background: #BC0032;
+                font-size: 1em;
+
+                width: 100%;
+                padding: 8px 0;
+
+                border: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Cameras</h1>
+        <form class="container" action="/">
+            <div class="field">
+                <label for="txtToken">Token</label>
+                <input id="txtToken" type="text" name="token" value="$Token">
+            </div>
+            <div class="field">
+                <label for="txtSettings">Settings</label>
+                <input id="txtSettings" type="text" name="settings" value="$Settings">
+            </div>
+            <div class="field">
+                <input type="hidden" name="sync" value="true">
+                <button type="submit">Send</button>
+            </div>
+        </form>
+    </body>
+</html>

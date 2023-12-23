@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Cameras</string>
+    <string name="error_generating_qr_code">Error generating QR Code</string>
 </resources>

@@ -23,6 +23,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -255,6 +256,11 @@ public class NetworkService {
         }
 
         return result;
+    }
+
+    public static InetAddress getFirstSiteLocalAddress() {
+        List<InetAddress> list = getSiteLocalAddresses();
+        return list.size() == 0 ? null : list.get(0);
     }
 
     public static List<InetAddress> getSiteLocalAddresses() {

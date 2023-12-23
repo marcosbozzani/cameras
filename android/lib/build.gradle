@@ -34,6 +34,8 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
     implementation 'org.videolan.android:libvlc-all:3.4.7'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.13.1'
+    implementation 'org.takes:takes:1.24.4'
+    implementation 'com.google.zxing:core:3.5.2'
 }
 
 task copyFiles(type: Copy) {
